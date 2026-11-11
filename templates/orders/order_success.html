@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Order Confirmed | AeroMart{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto my-8">
+
+    <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm text-center">
+        
+        <div class="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4 border border-emerald-100">
+            <i data-lucide="check" class="w-8 h-8"></i>
+        </div>
+
+        <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
+            Order Confirmed &bull; Processing
+        </span>
+
+        <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-3">
+            Thank you for your order!
+        </h1>
+        <p class="text-xs text-slate-500 mt-1">
+            Order <span class="font-bold text-slate-800">#{{ order.id }}</span> has been placed and is being prepared for dispatch.
+        </p>
+
+        <!-- Order Summary Card -->
+        <div class="mt-8 text-left bg-slate-50 border border-slate-200/80 rounded-2xl p-5 space-y-4 text-xs">
+            
+            <div class="grid grid-cols-2 gap-4 pb-4 border-b border-slate-200">
+                <div>
+                    <span class="text-slate-400 block font-medium">Deliver to</span>
+                    <strong class="text-slate-800 block text-sm">{{ order.full_name }}</strong>
+                    <span class="text-slate-600">{{ order.shipping_address }}, {{ order.city }} {{ order.postal_code }}</span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block font-medium">Delivery Method</span>
+                    <strong class="text-slate-800 block text-sm">{{ order.delivery_option }}</strong>
+                    <span class="text-slate-600">Contact: {{ order.phone }}</span>
+                </div>
+            </div>
+
+            <!-- Items -->
+            <div class="space-y-2 pb-3 border-b border-slate-200">
+                <span class="text-slate-400 font-bold uppercase tracking-wider text-[10px] block">Items in this shipment</span>
+                {% for item in order.items.all %}
+                    <div class="flex justify-between items-center text-slate-700">
+                        <span>{{ item.quantity }} &times; {{ item.product_title }}</span>
+                        <span class="font-bold text-slate-900">${{ item.total_price }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Totals -->
+            <div class="space-y-1.5 pt-1">
+                <div class="flex justify-between text-slate-600">
+                    <span>Subtotal</span>
+                    <span>${{ order.subtotal }}</span>
+                </div>
+                <div class="flex justify-between text-slate-600">
+                    <span>Delivery</span>
+                    <span>{% if order.delivery_fee == 0 %}FREE{% else %}${{ order.delivery_fee }}{% endif %}</span>
+                </div>
+                <div class="flex justify-between font-black text-slate-900 text-sm pt-2 border-t border-slate-200">
+                    <span>Total Paid</span>
+                    <span class="text-indigo-600 font-black text-base">${{ order.grand_total }}</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="{% url 'home' %}" class="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 text-xs shadow-sm">
+                Continue Shopping
+            </a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'my_orders' %}" class="w-full sm:w-auto px-6 py-2.5 rounded-xl font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 text-xs">
+                    View All Orders
+                </a>
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+

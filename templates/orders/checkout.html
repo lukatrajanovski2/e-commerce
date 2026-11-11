@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout | AeroMart{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+
+    <div>
+        <h1 class="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <i data-lucide="shield-check" class="w-6 h-6 text-indigo-600"></i>
+            <span>Complete Your Order</span>
+        </h1>
+        <p class="text-xs text-slate-500 mt-1">Enter your shipping details below to complete your purchase</p>
+    </div>
+
+    <form method="POST" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {% csrf_token %}
+
+        <!-- Left: Shipping Address Form (7 cols) -->
+        <div class="lg:col-span-7 bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-5">
+            <h2 class="font-bold text-sm text-slate-900 pb-3 border-b border-slate-100 flex items-center gap-2">
+                <i data-lucide="map-pin" class="w-4 h-4 text-indigo-600"></i>
+                <span>Shipping Address</span>
+            </h2>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Full Name *</label>
+                    {{ form.full_name }}
+                    {% if form.full_name.errors %}
+                        <p class="text-xs text-rose-600 mt-1">{{ form.full_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Email Address *</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <p class="text-xs text-rose-600 mt-1">{{ form.email.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Phone Number *</label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                            <p class="text-xs text-rose-600 mt-1">{{ form.phone.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Street Address *</label>
+                    {{ form.shipping_address }}
+                    {% if form.shipping_address.errors %}
+                        <p class="text-xs text-rose-600 mt-1">{{ form.shipping_address.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">City *</label>
+                        {{ form.city }}
+                        {% if form.city.errors %}
+                            <p class="text-xs text-rose-600 mt-1">{{ form.city.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Zip / Postal Code *</label>
+                        {{ form.postal_code }}
+                        {% if form.postal_code.errors %}
+                            <p class="text-xs text-rose-600 mt-1">{{ form.postal_code.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Simulation Note -->
+            <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center gap-3 text-xs text-slate-600">
+                <i data-lucide="credit-card" class="w-5 h-5 text-indigo-600 flex-shrink-0"></i>
+                <span>Payment method: <strong class="text-slate-800">Demo Instant Checkout</strong> (No actual charge processed)</span>
+            </div>
+        </div>
+
+        <!-- Right: Order Summary (5 cols) -->
+        <div class="lg:col-span-5 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-5">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="font-bold text-sm text-slate-900">Your Items</h3>
+                <a href="{% url 'cart_detail' %}" class="text-xs text-indigo-600 font-semibold hover:underline">
+                    Edit Cart
+                </a>
+            </div>
+
+            <!-- Items List -->
+            <div class="space-y-3 max-h-60 overflow-y-auto pr-1">
+                {% for item in cart.items.all %}
+                    <div class="flex items-center justify-between text-xs">
+                        <div class="flex items-center space-x-2.5 min-w-0">
+                            <img src="{{ item.product.display_image }}" class="w-10 h-10 rounded-lg object-cover bg-slate-100 flex-shrink-0">
+                            <div class="min-w-0">
+                                <span class="font-bold text-slate-800 block truncate">{{ item.product.title }}</span>
+                                <span class="text-slate-400 text-[11px]">Qty: {{ item.quantity }} &times; ${{ item.product.price }}</span>
+                            </div>
+                        </div>
+                        <span class="font-bold text-slate-900 ml-2">${{ item.total_price }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Selected Delivery Method Badge -->
+            <div class="bg-indigo-50/70 border border-indigo-100 rounded-2xl p-3.5 flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="truck" class="w-4 h-4 text-indigo-600"></i>
+                    <div>
+                        <span class="block font-bold text-indigo-950">{{ cart.delivery_label }}</span>
+                        <a href="{% url 'cart_detail' %}" class="text-[11px] text-indigo-600 hover:underline">Change option</a>
+                    </div>
+                </div>
+                <div class="font-black text-indigo-950">
+                    {% if cart.delivery_fee == 0 %}FREE{% else %}${{ cart.delivery_fee }}{% endif %}
+                </div>
+            </div>
+
+            <!-- Totals -->
+            <div class="space-y-2 border-t border-slate-100 pt-3 text-xs">
+                <div class="flex justify-between text-slate-600">
+                    <span>Subtotal</span>
+                    <span class="font-bold text-slate-900">${{ cart.subtotal }}</span>
+                </div>
+                <div class="flex justify-between text-slate-600">
+                    <span>Delivery</span>
+                    <span class="font-bold text-slate-900">{% if cart.delivery_fee == 0 %}FREE{% else %}${{ cart.delivery_fee }}{% endif %}</span>
+                </div>
+                <div class="border-t border-slate-100 pt-3 flex justify-between items-baseline">
+                    <span class="text-sm font-extrabold text-slate-900">Total</span>
+                    <span class="text-2xl font-black text-indigo-600">${{ cart.grand_total }}</span>
+                </div>
+            </div>
+
+            <button type="submit" 
+                    class="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-98 shadow-md shadow-indigo-200 transition-all text-sm">
+                <i data-lucide="lock" class="w-4 h-4"></i>
+                <span>Confirm &amp; Place Order (${{ cart.grand_total }})</span>
+            </button>
+        </div>
+
+    </form>
+
+</div>
+{% endblock %}
+
